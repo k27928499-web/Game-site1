@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VORTEXA — پلتفرم بازی و تورنومنت</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===================== ROOT / TOKENS ===================== */
+:root{
+  --bg-void: #0a0b14;
+  --bg-void-2: #0f1120;
+  --panel: #12142450;
+  --panel-solid: #14162a;
+  --line: #2a2d4a;
+  --violet: #8b5cf6;
+  --violet-2: #6d28d9;
+  --teal: #00e5c7;
+  --pink: #ff3d81;
+  --amber: #ffb020;
+  --text: #eceafc;
+  --text-dim: #9a9cc0;
+  --text-mute: #6b6d95;
+  --font-fa: 'Vazirmatn', sans-serif;
+  --font-num: 'Rajdhani', 'Vazirmatn', sans-serif;
+  --radius: 18px;
+  --ease: cubic-bezier(.16,1,.3,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg-void);
+  color:var(--text);
+  font-family:var(--font-fa);
+  overflow-x:hidden;
+  position:relative;
+  line-height:1.7;
+}
+::selection{background:var(--violet);color:#fff;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;}
+}
+
+a{color:inherit;text-decoration:none;}
+ul{list-style:none;}
+img{max-width:100%;display:block;}
+button{font-family:inherit;border:none;cursor:pointer;background:none;color:inherit;}
+
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:var(--bg-void);}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--violet),var(--teal));border-radius:10px;}
+
+/* ===================== BACKGROUND FX ===================== */
+#bg-canvas{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  opacity:.55;
+}
+.bg-noise{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;
+}
+.glow-orb{
+  position:fixed;border-radius:50%;filter:blur(90px);z-index:0;pointer-events:none;opacity:.35;
+}
+.glow-orb.a{width:520px;height:520px;top:-160px;right:-120px;background:var(--violet);}
+.glow-orb.b{width:420px;height:420px;bottom:10%;left:-140px;background:var(--teal);opacity:.22;}
+.glow-orb.c{width:380px;height:380px;top:55%;right:20%;background:var(--pink);opacity:.15;}
+
+.cursor-glow{
+  position:fixed;width:380px;height:380px;border-radius:50%;
+  background:radial-gradient(circle,rgba(139,92,246,.14),transparent 70%);
+  pointer-events:none;z-index:2;transform:translate(-50%,-50%);
+  transition:opacity .3s;
+}
+
+/* ===================== LAYOUT HELPERS ===================== */
+.wrap{max-width:1240px;margin:0 auto;padding:0 28px;position:relative;z-index:3;}
+section{position:relative;z-index:3;}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-num);font-weight:600;letter-spacing:.14em;
+  font-size:.78rem;color:var(--teal);text-transform:uppercase;
+  padding:6px 14px;border:1px solid rgba(0,229,199,.35);border-radius:999px;
+  background:rgba(0,229,199,.06);
+}
+.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);}
+
+h1,h2,h3{font-weight:800;letter-spacing:-.01em;}
+.section-head{max-width:640px;margin-bottom:52px;}
+.section-head h2{font-size:clamp(1.8rem,3.6vw,2.7rem);margin:16px 0 14px;}
+.section-head p{color:var(--text-dim);font-size:1.05rem;}
+.grad-text{
+  background:linear-gradient(90deg,var(--teal),var(--violet) 60%,var(--pink));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .8s var(--ease),transform .8s var(--ease);}
+.reveal.in{opacity:1;transform:translateY(0);}
+.reveal-scale{opacity:0;transform:scale(.92);transition:opacity .7s var(--ease),transform .7s var(--ease);}
+.reveal-scale.in{opacity:1;transform:scale(1);}
+
+/* ===================== NAVBAR ===================== */
+header{
+  position:fixed;top:0;right:0;left:0;z-index:100;
+  padding:18px 0;transition:background .4s,padding .4s,border-color .4s;
+  border-bottom:1px solid transparent;
+}
+header.scrolled{
+  background:rgba(10,11,20,.78);backdrop-filter:blur(16px) saturate(140%);
+  padding:12px 0;border-color:var(--line);
+}
+nav{display:flex;align-items:center;justify-content:space-between;}
+.logo{
+  display:flex;align-items:center;gap:10px;font-family:var(--font-num);
+  font-weight:700;font-size:1.35rem;letter-spacing:.02em;
+}
+.logo .mark{
+  width:34px;height:34px;border-radius:9px;
+  background:conic-gradient(from 90deg,var(--violet),var(--teal),var(--pink),var(--violet));
+  animation:spin 6s linear infinite;position:relative;
+}
+.logo .mark::after{content:'';position:absolute;inset:3px;background:var(--bg-void);border-radius:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.nav-links{display:flex;gap:34px;font-size:.95rem;font-weight:500;}
+.nav-links a{position:relative;color:var(--text-dim);transition:color .25s;padding:4px 0;}
+.nav-links a::after{
+  content:'';position:absolute;bottom:0;right:0;width:0;height:1.5px;
+  background:linear-gradient(90deg,var(--teal),var(--violet));transition:width .3s var(--ease);
+}
+.nav-links a:hover{color:var(--text);}
+.nav-links a:hover::after{width:100%;}
+.nav-cta{
+  display:flex;align-items:center;gap:14px;
+}
+.btn{
+  font-family:var(--font-fa);font-weight:600;font-size:.92rem;
+  padding:11px 24px;border-radius:11px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:8px;
+  transition:transform .3s var(--ease),box-shadow .3s var(--ease),filter .3s;
+}
+.btn-primary{
+  background:linear-gradient(120deg,var(--violet),var(--violet-2));
+  color:#fff;box-shadow:0 8px 24px -8px rgba(139,92,246,.7);
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 14px 30px -8px rgba(139,92,246,.85);}
+.btn-ghost{
+  border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.02);
+}
+.btn-ghost:hover{border-color:var(--teal);color:var(--teal);}
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer;z-index:120;}
+.burger span{width:24px;height:2px;background:var(--text);transition:.3s;}
+
+/* ===================== HERO ===================== */
+.hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:150px 0 80px;position:relative;
+}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:50px;align-items:center;}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:10px;margin-bottom:26px;
+  font-family:var(--font-num);font-size:.82rem;font-weight:600;letter-spacing:.12em;
+  color:var(--pink);text-transform:uppercase;
+}
+.hero-tag .dot{width:7px;height:7px;border-radius:50%;background:var(--pink);animation:pulse 1.8s infinite;}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,61,129,.6);}50%{opacity:.6;box-shadow:0 0 0 8px rgba(255,61,129,0);}}
+
+.hero h1{
+  font-size:clamp(2.6rem,6vw,4.6rem);line-height:1.12;margin-bottom:22px;
+  position:relative;
+}
+.glitch-wrap{display:inline-block;position:relative;}
+.glitch-wrap .layer{
+  position:absolute;top:0;right:0;width:100%;
+  color:transparent;-webkit-background-clip:text;background-clip:text;
+  opacity:0;mix-blend-mode:screen;pointer-events:none;
+}
+.hero p.lead{font-size:1.15rem;color:var(--text-dim);max-width:520px;margin-bottom:34px;}
+.hero-actions{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:46px;}
+.btn-lg{padding:15px 30px;font-size:1rem;border-radius:13px;}
+
+.hero-stats{display:flex;gap:36px;flex-wrap:wrap;}
+.hstat b{
+  font-family:var(--font-num);font-size:2rem;font-weight:700;display:block;
+  background:linear-gradient(90deg,var(--teal),var(--violet));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hstat span{font-size:.85rem;color:var(--text-mute);}
+
+/* hero visual: floating game card stack */
+.hero-visual{position:relative;height:520px;}
+.float-card{
+  position:absolute;border-radius:20px;overflow:hidden;
+  border:1px solid var(--line);background:linear-gradient(160deg,#181b32,#0f1120);
+  box-shadow:0 30px 60px -20px rgba(0,0,0,.6);
+  animation:float 6s ease-in-out infinite;
+}
+.float-card.fc1{width:64%;top:6%;right:4%;z-index:3;animation-delay:0s;}
+.float-card.fc2{width:52%;bottom:8%;right:26%;z-index:2;animation-delay:1.2s;opacity:.85;}
+.float-card.fc3{width:40%;top:38%;right:-4%;z-index:1;animation-delay:2s;opacity:.6;}
+@keyframes float{0%,100%{transform:translateY(0) rotate(0deg);}50%{transform:translateY(-18px) rotate(-1.2deg);}}
+.float-card img{width:100%;height:150px;object-fit:cover;}
+.float-card .fc-body{padding:14px 16px;}
+.float-card .fc-body b{font-size:.95rem;}
+.float-card .fc-body span{font-size:.78rem;color:var(--text-mute);}
+.live-badge{
+  position:absolute;top:10px;left:10px;background:var(--pink);color:#fff;
+  font-family:var(--font-num);font-size:.68rem;font-weight:700;letter-spacing:.08em;
+  padding:4px 10px;border-radius:6px;display:flex;align-items:center;gap:5px;
+}
+.live-badge::before{content:'';width:6px;height:6px;background:#fff;border-radius:50%;animation:pulse 1.4s infinite;}
+
+.scroll-hint{
+  position:absolute;bottom:26px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  color:var(--text-mute);font-size:.75rem;font-family:var(--font-num);letter-spacing:.1em;
+}
+.mouse{width:22px;height:34px;border:2px solid var(--text-mute);border-radius:12px;position:relative;}
+.mouse::after{content:'';position:absolute;top:6px;right:50%;transform:translateX(50%);width:3px;height:6px;background:var(--teal);border-radius:2px;animation:scrolldown 1.6s infinite;}
+@keyframes scrolldown{0%{opacity:1;top:6px;}100%{opacity:0;top:18px;}}
+
+/* ===================== MARQUEE ===================== */
+.marquee-strip{
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:20px 0;overflow:hidden;background:rgba(139,92,246,.04);
+}
+.marquee-track{display:flex;gap:60px;width:max-content;animation:scroll-x 26s linear infinite;}
+.marquee-track span{
+  font-family:var(--font-num);font-size:1.3rem;font-weight:700;color:var(--text-mute);
+  display:flex;align-items:center;gap:16px;white-space:nowrap;
+}
+.marquee-track span i{width:5px;height:5px;background:var(--violet);border-radius:50%;}
+@keyframes scroll-x{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ===================== GAMES ===================== */
+.games{padding:130px 0;}
+.game-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+.game-card{
+  position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--line);
+  background:var(--panel-solid);cursor:pointer;height:340px;
+  transition:transform .5s var(--ease),border-color .4s;
+}
+.game-card:nth-child(1),.game-card:nth-child(2){grid-row:span 2;height:100%;}
+.game-card img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;
+  transition:transform .7s var(--ease),filter .5s;filter:grayscale(.25) brightness(.75);}
+.game-card:hover img{transform:scale(1.08);filter:grayscale(0) brightness(.9);}
+.game-card:hover{transform:translateY(-8px);border-color:var(--teal);}
+.game-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 30%,rgba(10,11,20,.95) 100%);
+  z-index:1;
+}
+.gc-content{position:absolute;bottom:0;right:0;left:0;padding:22px;z-index:2;}
+.gc-tag{
+  font-family:var(--font-num);font-size:.7rem;font-weight:700;letter-spacing:.1em;
+  color:var(--teal);text-transform:uppercase;margin-bottom:6px;display:block;
+}
+.gc-content h3{font-size:1.25rem;margin-bottom:6px;}
+.gc-content p{font-size:.85rem;color:var(--text-dim);}
+.gc-players{
+  display:flex;align-items:center;gap:6px;margin-top:12px;
+  font-family:var(--font-num);font-size:.78rem;color:var(--text-mute);
+}
+.gc-players i{width:6px;height:6px;border-radius:50%;background:#3ddc97;box-shadow:0 0 8px #3ddc97;}
+
+/* ===================== FEATURES ===================== */
+.features{padding:100px 0;position:relative;}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+.feat-card{
+  padding:32px 28px;border-radius:var(--radius);border:1px solid var(--line);
+  background:linear-gradient(160deg,rgba(139,92,246,.06),rgba(255,255,255,.01));
+  transition:transform .4s var(--ease),border-color .4s;position:relative;overflow:hidden;
+}
+.feat-card::before{
+  content:'';position:absolute;top:-40%;left:-30%;width:70%;height:70%;
+  background:radial-gradient(circle,rgba(0,229,199,.15),transparent 70%);
+  opacity:0;transition:opacity .5s;
+}
+.feat-card:hover::before{opacity:1;}
+.feat-card:hover{transform:translateY(-6px);border-color:var(--violet);}
+.feat-icon{
+  width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(140deg,var(--violet),var(--pink));margin-bottom:20px;font-size:1.4rem;
+}
+.feat-card h3{font-size:1.15rem;margin-bottom:10px;}
+.feat-card p{color:var(--text-dim);font-size:.92rem;}
+
+/* ===================== STATS COUNTER ===================== */
+.stats-band{
+  padding:70px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  background:linear-gradient(90deg,rgba(139,92,246,.06),rgba(0,229,199,.04));
+}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:20px;}
+.stat-num{
+  font-family:var(--font-num);font-weight:800;font-size:clamp(2rem,4vw,3.2rem);
+  background:linear-gradient(90deg,var(--teal),var(--violet));-webkit-background-clip:text;
+  background-clip:text;color:transparent;
+}
+.stat-label{color:var(--text-mute);font-size:.9rem;margin-top:6px;}
+
+/* ===================== TOURNAMENTS ===================== */
+.tournaments{padding:130px 0;}
+.tourn-list{display:flex;flex-direction:column;gap:16px;}
+.tourn-item{
+  display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:24px;
+  padding:22px 26px;border:1px solid var(--line);border-radius:16px;
+  background:var(--panel-solid);transition:border-color .35s,transform .35s var(--ease),background .35s;
+}
+.tourn-item:hover{border-color:var(--pink);transform:translateX(-6px);background:#161930;}
+.tourn-date{
+  text-align:center;font-family:var(--font-num);background:rgba(139,92,246,.12);
+  border-radius:10px;padding:8px 14px;min-width:64px;
+}
+.tourn-date b{display:block;font-size:1.3rem;color:var(--teal);}
+.tourn-date span{font-size:.7rem;color:var(--text-mute);}
+.tourn-info h4{font-size:1.1rem;margin-bottom:5px;}
+.tourn-info span{color:var(--text-mute);font-size:.85rem;}
+.tourn-prize{font-family:var(--font-num);font-weight:700;color:var(--amber);font-size:1.1rem;text-align:center;}
+.tourn-prize small{display:block;font-family:var(--font-fa);color:var(--text-mute);font-size:.7rem;font-weight:400;}
+.tourn-status{
+  font-family:var(--font-num);font-size:.72rem;font-weight:700;padding:6px 14px;
+  border-radius:999px;letter-spacing:.06em;white-space:nowrap;
+}
+.tourn-status.open{background:rgba(61,220,151,.14);color:#3ddc97;}
+.tourn-status.soon{background:rgba(255,176,32,.14);color:var(--amber);}
+.tourn-status.full{background:rgba(255,61,129,.14);color:var(--pink);}
+
+/* ===================== TEAM / STREAMERS ===================== */
+.team{padding:100px 0;}
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+.team-card{
+  border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--panel-solid);
+  transition:transform .4s var(--ease);
+}
+.team-card:hover{transform:translateY(-8px) rotate(-1deg);}
+.team-img{height:220px;position:relative;overflow:hidden;}
+.team-img img{width:100%;height:100%;object-fit:cover;transition:transform .6s var(--ease);}
+.team-card:hover .team-img img{transform:scale(1.1);}
+.team-social{
+  position:absolute;bottom:10px;right:10px;background:rgba(10,11,20,.7);
+  backdrop-filter:blur(6px);padding:5px 10px;border-radius:8px;
+  font-family:var(--font-num);font-size:.72rem;color:var(--teal);
+}
+.team-body{padding:16px;}
+.team-body h4{font-size:1.02rem;}
+.team-body span{color:var(--text-mute);font-size:.82rem;}
+
+/* ===================== TESTIMONIALS ===================== */
+.testi{padding:130px 0;}
+.testi-track-wrap{overflow:hidden;position:relative;}
+.testi-track{display:flex;gap:22px;transition:transform .6s var(--ease);}
+.testi-card{
+  min-width:calc(33.333% - 15px);padding:28px;border-radius:var(--radius);
+  border:1px solid var(--line);background:var(--panel-solid);
+}
+.testi-stars{color:var(--amber);letter-spacing:2px;margin-bottom:14px;font-size:.95rem;}
+.testi-card p{color:var(--text-dim);font-size:.95rem;margin-bottom:20px;}
+.testi-user{display:flex;align-items:center;gap:12px;}
+.testi-user img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--violet);}
+.testi-user b{display:block;font-size:.92rem;}
+.testi-user span{color:var(--text-mute);font-size:.78rem;}
+.testi-nav{display:flex;gap:12px;justify-content:center;margin-top:34px;}
+.testi-nav button{
+  width:42px;height:42px;border-radius:50%;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:.3s;
+}
+.testi-nav button:hover{background:var(--violet);border-color:var(--violet);}
+
+/* ===================== PRICING ===================== */
+.pricing{padding:130px 0;}
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;align-items:stretch;}
+.price-card{
+  padding:36px 30px;border-radius:20px;border:1px solid var(--line);background:var(--panel-solid);
+  display:flex;flex-direction:column;transition:transform .4s var(--ease),border-color .4s;
+}
+.price-card:hover{transform:translateY(-8px);}
+.price-card.pro{
+  border:1px solid var(--violet);background:linear-gradient(180deg,rgba(139,92,246,.14),var(--panel-solid) 40%);
+  position:relative;transform:scale(1.03);
+}
+.price-badge{
+  position:absolute;top:-13px;right:30px;background:linear-gradient(120deg,var(--pink),var(--violet));
+  padding:5px 16px;border-radius:999px;font-size:.72rem;font-weight:700;font-family:var(--font-num);letter-spacing:.06em;
+}
+.price-card h3{font-size:1.2rem;margin-bottom:8px;}
+.price-card .desc{color:var(--text-mute);font-size:.85rem;margin-bottom:22px;}
+.price-amt{font-family:var(--font-num);font-size:2.6rem;font-weight:800;margin-bottom:4px;}
+.price-amt small{font-size:1rem;color:var(--text-mute);font-weight:500;}
+.price-per{color:var(--text-mute);font-size:.82rem;margin-bottom:26px;}
+.price-list{display:flex;flex-direction:column;gap:12px;margin-bottom:30px;flex:1;}
+.price-list li{display:flex;align-items:center;gap:10px;font-size:.9rem;color:var(--text-dim);}
+.price-list li i{color:var(--teal);font-style:normal;}
+
+/* ===================== CTA NEWSLETTER ===================== */
+.cta-band{padding:100px 0;}
+.cta-inner{
+  border-radius:28px;padding:64px 50px;text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#1a1235,#0f1120);border:1px solid var(--line);
+}
+.cta-inner::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 20%,rgba(139,92,246,.35),transparent 55%),
+             radial-gradient(circle at 80% 80%,rgba(0,229,199,.25),transparent 55%);
+}
+.cta-inner h2{position:relative;font-size:clamp(1.7rem,3.4vw,2.5rem);margin-bottom:14px;}
+.cta-inner p{position:relative;color:var(--text-dim);margin-bottom:30px;}
+.cta-form{position:relative;display:flex;gap:12px;max-width:420px;margin:0 auto;flex-wrap:wrap;justify-content:center;}
+.cta-form input{
+  flex:1;min-width:220px;padding:14px 18px;border-radius:12px;border:1px solid var(--line);
+  background:rgba(255,255,255,.04);color:var(--text);font-family:inherit;
+}
+.cta-form input:focus{outline:2px solid var(--teal);}
+.cta-note{position:relative;margin-top:14px;font-size:.78rem;color:var(--text-mute);}
+
+/* ===================== FOOTER ===================== */
+footer{padding:70px 0 30px;border-top:1px solid var(--line);}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px;margin-bottom:50px;}
+.foot-brand p{color:var(--text-mute);font-size:.9rem;margin:16px 0 20px;max-width:280px;}
+.foot-social{display:flex;gap:10px;}
+.foot-social a{
+  width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;transition:.3s;
+}
+.foot-social a:hover{border-color:var(--teal);color:var(--teal);transform:translateY(-3px);}
+.foot-col h5{font-size:.9rem;margin-bottom:16px;color:var(--text);}
+.foot-col ul{display:flex;flex-direction:column;gap:10px;}
+.foot-col a{color:var(--text-mute);font-size:.88rem;transition:color .25s;}
+.foot-col a:hover{color:var(--teal);}
+.foot-bottom{
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  padding-top:26px;border-top:1px solid var(--line);color:var(--text-mute);font-size:.82rem;
+  font-family:var(--font-num);
+}
+
+/* ===================== BACK TO TOP ===================== */
+.to-top{
+  position:fixed;bottom:26px;left:26px;width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(140deg,var(--violet),var(--teal));z-index:90;
+  display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:#fff;
+  opacity:0;pointer-events:none;transform:translateY(20px);transition:.4s var(--ease);
+  box-shadow:0 10px 24px -6px rgba(139,92,246,.6);
+}
+.to-top.show{opacity:1;pointer-events:auto;transform:translateY(0);}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width:1080px){
+  .game-grid{grid-template-columns:repeat(2,1fr);}
+  .game-card:nth-child(1),.game-card:nth-child(2){grid-row:span 1;height:340px;}
+  .feat-grid{grid-template-columns:repeat(2,1fr);}
+  .team-grid{grid-template-columns:repeat(2,1fr);}
+  .price-grid{grid-template-columns:1fr;max-width:420px;margin:0 auto;}
+  .price-card.pro{transform:scale(1);}
+  .stats-grid{grid-template-columns:repeat(2,1fr);row-gap:30px;}
+  .foot-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:860px){
+  .nav-links{position:fixed;inset:0 0 0 auto;width:78%;max-width:320px;
+    background:rgba(12,13,26,.98);backdrop-filter:blur(20px);
+    flex-direction:column;padding:110px 34px;gap:26px;
+    transform:translateX(102%);transition:transform .45s var(--ease);z-index:110;
+    border-left:1px solid var(--line);}
+  .nav-links.open{transform:translateX(0);}
+  .burger{display:flex;}
+  .nav-cta .btn-ghost{display:none;}
+  .hero-grid{grid-template-columns:1fr;}
+  .hero-visual{height:400px;margin-top:20px;}
+  .hero-stats{gap:26px;}
+}
+@media (max-width:640px){
+  .wrap{padding:0 20px;}
+  .game-grid{grid-template-columns:1fr;}
+  .feat-grid{grid-template-columns:1fr;}
+  .team-grid{grid-template-columns:1fr 1fr;}
+  .tourn-item{grid-template-columns:1fr;text-align:center;gap:10px;}
+  .testi-card{min-width:100%;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .foot-grid{grid-template-columns:1fr 1fr;gap:26px;}
+  .cta-inner{padding:44px 22px;}
+  .hero{padding-top:120px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="bg-noise"></div>
+<div class="glow-orb a"></div>
+<div class="glow-orb b"></div>
+<div class="glow-orb c"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- ===================== HEADER ===================== -->
+<header id="siteHeader">
+  <div class="wrap">
+    <nav>
+      <div class="logo"><span class="mark"></span> VORTEXA</div>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#games">بازی‌ها</a></li>
+        <li><a href="#features">امکانات</a></li>
+        <li><a href="#tournaments">تورنومنت‌ها</a></li>
+        <li><a href="#team">تیم و استریمرها</a></li>
+        <li><a href="#pricing">اشتراک‌ها</a></li>
+        <li><a href="#testimonials">نظرات</a></li>
+      </ul>
+      <div class="nav-cta">
+        <a href="#" class="btn btn-ghost">ورود</a>
+        <a href="#pricing" class="btn btn-primary">شروع رایگان</a>
+        <div class="burger" id="burger"><span></span><span></span><span></span></div>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="hero-tag"><span class="dot"></span> بزرگ‌ترین اکوسیستم گیمینگ فارسی‌زبان</div>
+      <h1>
+        <span class="glitch-wrap" id="glitchTitle">
+          وارد دنیای <span class="grad-text">ورتکسا</span> شو
+          <span class="layer l1">وارد دنیای <span class="grad-text">ورتکسا</span> شو</span>
+          <span class="layer l2">وارد دنیای <span class="grad-text">ورتکسا</span> شو</span>
+        </span>
+      </h1>
+      <p class="lead">بازی کن، رقابت کن، ببر. به جامعه‌ای بپیوند که تورنومنت‌های واقعی، پخش زنده، و رتبه‌بندی حرفه‌ای رو با هم ترکیب کرده — همه‌چیز در یک پلتفرم واحد.</p>
+      <div class="hero-actions">
+        <a href="#pricing" class="btn btn-primary btn-lg">🎮 همین حالا بازی کن</a>
+        <a href="#tournaments" class="btn btn-ghost btn-lg">مشاهده تورنومنت‌ها</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b class="counter" data-target="2400000">۰</b><span>گیمر فعال</span></div>
+        <div class="hstat"><b class="counter" data-target="18500">۰</b><span>تورنومنت برگزار شده</span></div>
+        <div class="hstat"><b class="counter" data-target="97">۰</b><span>٪ رضایت کاربران</span></div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="float-card fc1">
+        <div class="live-badge">پخش زنده</div>
+        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?w=600&q=80" alt="بازی سایبرپانک">
+        <div class="fc-body"><b>نبرد نئون‌سیتی</b><br><span>۱۲,۴۰۰ بیننده هم‌اکنون</span></div>
+      </div>
+      <div class="float-card fc2">
+        <img src="https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=500&q=80" alt="کنترلر بازی">
+        <div class="fc-body"><b>فینال جهانی فصل ۷</b><br><span>جایزه: ۵۰,۰۰۰ دلار</span></div>
+      </div>
+      <div class="float-card fc3">
+        <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&q=80" alt="ست‌آپ گیمینگ">
+        <div class="fc-body"><b>رتبه‌بندی هفتگی</b><br><span>به رده الماس برس</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="mouse"></div>اسکرول کن</div>
+</section>
+
+<!-- ===================== MARQUEE ===================== -->
+<div class="marquee-strip">
+  <div class="marquee-track" id="marqueeTrack">
+    <span><i></i>واکنش‌گرا در هر دستگاه</span>
+    <span><i></i>پخش زنده بدون تاخیر</span>
+    <span><i></i>رتبه‌بندی رقابتی</span>
+    <span><i></i>جوایز نقدی واقعی</span>
+    <span><i></i>جامعه‌ای با ۲.۴ میلیون گیمر</span>
+    <span><i></i>واکنش‌گرا در هر دستگاه</span>
+    <span><i></i>پخش زنده بدون تاخیر</span>
+    <span><i></i>رتبه‌بندی رقابتی</span>
+    <span><i></i>جوایز نقدی واقعی</span>
+    <span><i></i>جامعه‌ای با ۲.۴ میلیون گیمر</span>
+  </div>
+</div>
+
+<!-- ===================== GAMES ===================== -->
+<section class="games" id="games">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">کتابخانه بازی‌ها</span>
+      <h2>محبوب‌ترین <span class="grad-text">عناوین</span> هفته</h2>
+      <p>از اکشن‌های تیمی گرفته تا استراتژی‌های ذهنی — هرچی دوست داری همینجاست.</p>
+    </div>
+    <div class="game-grid">
+      <div class="game-card reveal-scale">
+        <img src="https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=700&q=80" alt="بازی اکشن">
+        <div class="gc-content">
+          <span class="gc-tag">اکشن / تیمی</span>
+          <h3>عملیات سایه</h3>
+          <p>نبرد ۵ در ۵ در نقشه‌های شهری تاریک</p>
+          <div class="gc-players"><i></i> ۴۸۲ هزار بازیکن آنلاین</div>
+        </div>
+      </div>
+      <div class="game-card reveal-scale">
+        <img src="https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=700&q=80" alt="بازی استراتژی">
+        <div class="gc-content">
+          <span class="gc-tag">استراتژی</span>
+          <h3>امپراتوری خاکستر</h3>
+          <p>ساخت تمدن، اتحاد و فتح قلمرو</p>
+          <div class="gc-players"><i></i> ۲۱۰ هزار بازیکن آنلاین</div>
+        </div>
+      </div>
+      <div class="game-card reveal-scale">
+        <img src="https://images.unsplash.com/photo-1580327344181-c1163234e5a0?w=500&q=80" alt="بازی مسابقه‌ای">
+        <div class="gc-content">
+          <span class="gc-tag">مسابقه‌ای</span>
+          <h3>سرعت بی‌نهایت</h3>
+          <p>مسابقات رالی در پیست‌های فضایی</p>
+          <div class="gc-players"><i></i> ۹۸ هزار بازیکن آنلاین</div>
+        </div>
+      </div>
+      <div class="game-card reveal-scale">
+        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&q=80" alt="بازی ماجراجویی">
+        <div class="gc-content">
+          <span class="gc-tag">نقش‌آفرینی</span>
+          <h3>افسانه تاج شکسته</h3>
+          <p>سفری حماسی در دنیایی باز و زنده</p>
+          <div class="gc-players"><i></i> ۳۳۰ هزار بازیکن آنلاین</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FEATURES ===================== -->
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">چرا ورتکسا</span>
+      <h2>ساخته‌شده برای <span class="grad-text">گیمرهای واقعی</span></h2>
+      <p>هر امکانی که برای رقابت جدی نیاز داری، دقیق و بدون دردسر.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card reveal">
+        <div class="feat-icon">⚡</div>
+        <h3>پینگ فوق‌پایین</h3>
+        <p>سرورهای اختصاصی نزدیک به تو، بدون لگ در حساس‌ترین لحظات نبرد.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🏆</div>
+        <h3>تورنومنت روزانه</h3>
+        <p>هر روز فرصت جدید برای رقابت و بردن جوایز نقدی واقعی.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">📊</div>
+        <h3>آمار زنده و دقیق</h3>
+        <p>پیشرفتت رو با داشبورد تحلیلی حرفه‌ای دنبال کن و نقاط ضعف رو پیدا کن.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🎥</div>
+        <h3>استودیوی پخش زنده</h3>
+        <p>مستقیم از داخل پلتفرم استریم کن، بدون نیاز به ابزار جانبی.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">🛡️</div>
+        <h3>امنیت ضد تقلب</h3>
+        <p>سیستم هوشمند شناسایی تقلب برای رقابتی سالم و منصفانه.</p>
+      </div>
+      <div class="feat-card reveal">
+        <div class="feat-icon">👥</div>
+        <h3>جامعه فعال</h3>
+        <p>تیم بساز، کلن راه بنداز و با هزاران گیمر دیگه در ارتباط باش.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STATS ===================== -->
+<section class="stats-band">
+  <div class="wrap stats-grid">
+    <div><div class="stat-num counter" data-target="2400000">۰</div><div class="stat-label">گیمر فعال ماهانه</div></div>
+    <div><div class="stat-num counter" data-target="480">۰</div><div class="stat-label">میلیون دلار جایزه پرداختی</div></div>
+    <div><div class="stat-num counter" data-target="150">۰</div><div class="stat-label">کشور فعال</div></div>
+    <div><div class="stat-num counter" data-target="99">۰</div><div class="stat-label">٪ آپتایم سرور</div></div>
+  </div>
+</section>
+
+<!-- ===================== TOURNAMENTS ===================== -->
+<section class="tournaments" id="tournaments">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">رویدادها</span>
+      <h2>تورنومنت‌های <span class="grad-text">پیش‌ رو</span></h2>
+      <p>ثبت‌نام کن، تمرین کن، و برای صعود به فینال آماده شو.</p>
+    </div>
+    <div class="tourn-list">
+      <div class="tourn-item reveal">
+        <div class="tourn-date"><b>۲۲</b><span>مرداد</span></div>
+        <div class="tourn-info"><h4>کاپ فصلی عملیات سایه</h4><span>حالت تیمی ۵×۵ • آنلاین</span></div>
+        <div class="tourn-prize">۵۰,۰۰۰$<small>جایزه کل</small></div>
+        <div class="tourn-status open">ثبت‌نام باز</div>
+      </div>
+      <div class="tourn-item reveal">
+        <div class="tourn-date"><b>۰۴</b><span>شهریور</span></div>
+        <div class="tourn-info"><h4>گرندپری سرعت بی‌نهایت</h4><span>حالت انفرادی • حذفی</span></div>
+        <div class="tourn-prize">۱۸,۰۰۰$<small>جایزه کل</small></div>
+        <div class="tourn-status open">ثبت‌نام باز</div>
+      </div>
+      <div class="tourn-item reveal">
+        <div class="tourn-date"><b>۱۵</b><span>شهریور</span></div>
+        <div class="tourn-info"><h4>جام امپراتوری خاکستر</h4><span>حالت کلن‌جنگ • آنلاین</span></div>
+        <div class="tourn-prize">۳۲,۰۰۰$<small>جایزه کل</small></div>
+        <div class="tourn-status soon">به‌زودی باز می‌شود</div>
+      </div>
+      <div class="tourn-item reveal">
+        <div class="tourn-date"><b>۰۱</b><span>مهر</span></div>
+        <div class="tourn-info"><h4>فینال جهانی فصل ۷</h4><span>حالت تیمی ۵×۵ • حضوری + آنلاین</span></div>
+        <div class="tourn-prize">۲۵۰,۰۰۰$<small>جایزه کل</small></div>
+        <div class="tourn-status full">ظرفیت تکمیل</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TEAM ===================== -->
+<section class="team" id="team">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">چهره‌های ورتکسا</span>
+      <h2>استریمرها و <span class="grad-text">قهرمانان</span></h2>
+      <p>با پرطرفدارترین بازیکنان و استریمرهای پلتفرم آشنا شو.</p>
+    </div>
+    <div class="team-grid">
+      <div class="team-card reveal">
+        <div class="team-img">
+          <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&q=80" alt="بازیکن">
+          <div class="team-social">۱.۲M دنبال‌کننده</div>
+        </div>
+        <div class="team-body"><h4>آرمین «شبح» رضایی</h4><span>قهرمان عملیات سایه</span></div>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-img">
+          <img src="https://images.unsplash.com/photo-1487528278747-ba99ed528ebc?w=400&q=80" alt="بازیکن">
+          <div class="team-social">۸۹۰K دنبال‌کننده</div>
+        </div>
+        <div class="team-body"><h4>سارا «نئون» کریمی</h4><span>رتبه ۱ سرعت بی‌نهایت</span></div>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-img">
+          <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80" alt="بازیکن">
+          <div class="team-social">۶۴۰K دنبال‌کننده</div>
+        </div>
+        <div class="team-body"><h4>دانیال «تندر» مرادی</h4><span>کاپیتان تیم خاکستر</span></div>
+      </div>
+      <div class="team-card reveal">
+        <div class="team-img">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" alt="بازیکن">
+          <div class="team-social">۵۱۰K دنبال‌کننده</div>
+        </div>
+        <div class="team-body"><h4>نگین «فانتوم» احمدی</h4><span>استریمر برتر ماه</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== TESTIMONIALS ===================== -->
+<section class="testi" id="testimonials">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">نظرات کاربران</span>
+      <h2>چیزی که <span class="grad-text">گیمرها</span> می‌گن</h2>
+      <p>هزاران گیمر هر روز تجربه‌شون رو با ما به اشتراک می‌ذارن.</p>
+    </div>
+    <div class="testi-track-wrap">
+      <div class="testi-track" id="testiTrack">
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p>«بهترین پلتفرمی که تا حالا برای رقابت جدی امتحان کردم. کیفیت سرورها واقعاً حرفه‌ایه.»</p>
+          <div class="testi-user">
+            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80" alt="کاربر">
+            <div><b>نگین احمدی</b><span>گیمر حرفه‌ای</span></div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p>«از طراحی داشبورد گرفته تا سیستم تورنومنت، همه چیز روون و بدون دردسره.»</p>
+          <div class="testi-user">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&q=80" alt="کاربر">
+            <div><b>آرمین رضایی</b><span>کاپیتان تیم</span></div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p>«جوایز نقدی واقعی هستن و پرداخت‌ها همیشه سر وقت انجام می‌شه. کاملاً قابل اعتماد.»</p>
+          <div class="testi-user">
+            <img src="https://images.unsplash.com/photo-1487528278747-ba99ed528ebc?w=100&q=80" alt="کاربر">
+            <div><b>سارا کریمی</b><span>استریمر</span></div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p>«جامعه‌ی فوق‌العاده‌ای داره؛ همیشه تیم برای بازی پیدا می‌کنم.»</p>
+          <div class="testi-user">
+            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&q=80" alt="کاربر">
+            <div><b>دانیال مرادی</b><span>عضو کلن خاکستر</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-nav">
+        <button id="testiPrev" aria-label="قبلی">→</button>
+        <button id="testiNext" aria-label="بعدی">←</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRICING ===================== -->
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow">اشتراک‌ها</span>
+      <h2>پلن مناسب <span class="grad-text">خودتو انتخاب کن</span></h2>
+      <p>هر زمان می‌تونی ارتقا بدی یا لغو کنی. بدون تعهد پنهان.</p>
+    </div>
+    <div class="price-grid">
+      <div class="price-card reveal">
+        <h3>رایگان</h3>
+        <p class="desc">برای شروع و آشنایی با پلتفرم</p>
+        <div class="price-amt">۰<small> تومان</small></div>
+        <div class="price-per">همیشه رایگان</div>
+        <ul class="price-list">
+          <li><i>✓</i> دسترسی به کتابخانه بازی‌ها</li>
+          <li><i>✓</i> شرکت در تورنومنت‌های عمومی</li>
+          <li><i>✓</i> رتبه‌بندی پایه</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">شروع کن</a>
+      </div>
+      <div class="price-card pro reveal">
+        <span class="price-badge">محبوب‌ترین</span>
+        <h3>حرفه‌ای</h3>
+        <p class="desc">برای گیمرهای رقابتی و جدی</p>
+        <div class="price-amt">۱۴۹<small> هزار تومان</small></div>
+        <div class="price-per">ماهانه</div>
+        <ul class="price-list">
+          <li><i>✓</i> همه امکانات پلن رایگان</li>
+          <li><i>✓</i> پینگ اختصاصی و اولویت سرور</li>
+          <li><i>✓</i> شرکت در تورنومنت‌های جایزه‌دار</li>
+          <li><i>✓</i> استودیوی پخش زنده اختصاصی</li>
+          <li><i>✓</i> آمار پیشرفته و تحلیل بازی</li>
+        </ul>
+        <a href="#" class="btn btn-primary">ارتقا به حرفه‌ای</a>
+      </div>
+      <div class="price-card reveal">
+        <h3>تیمی</h3>
+        <p class="desc">برای کلن‌ها و تیم‌های حرفه‌ای</p>
+        <div class="price-amt">۴۹۹<small> هزار تومان</small></div>
+        <div class="price-per">ماهانه، تا ۱۰ نفر</div>
+        <ul class="price-list">
+          <li><i>✓</i> همه امکانات پلن حرفه‌ای</li>
+          <li><i>✓</i> مدیریت کلن و اعضا</li>
+          <li><i>✓</i> پشتیبانی اختصاصی ۲۴ ساعته</li>
+          <li><i>✓</i> برندسازی اختصاصی تیم</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">تماس با فروش</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="cta-band">
+  <div class="wrap">
+    <div class="cta-inner reveal-scale">
+      <h2>آماده‌ای وارد <span class="grad-text">ورتکسا</span> بشی؟</h2>
+      <p>عضو خبرنامه شو و از تورنومنت‌های جدید و جوایز ویژه باخبر شو.</p>
+      <form class="cta-form" id="newsForm">
+        <input type="email" placeholder="ایمیلت رو وارد کن" required>
+        <button type="submit" class="btn btn-primary">عضویت</button>
+      </form>
+      <div class="cta-note" id="formNote">بدون هرزنامه. هر وقت خواستی لغو کن.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="logo"><span class="mark"></span> VORTEXA</div>
+        <p>اکوسیستم گیمینگ نسل جدید؛ جایی که بازی، رقابت و جامعه در کنار هم معنا پیدا می‌کنن.</p>
+        <div class="foot-social">
+          <a href="#">🐦</a><a href="#">📸</a><a href="#">🎮</a><a href="#">▶️</a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h5>پلتفرم</h5>
+        <ul><li><a href="#games">بازی‌ها</a></li><li><a href="#tournaments">تورنومنت‌ها</a></li><li><a href="#pricing">اشتراک‌ها</a></li></ul>
+      </div>
+      <div class="foot-col">
+        <h5>شرکت</h5>
+        <ul><li><a href="#">درباره ما</a></li><li><a href="#">فرصت‌های شغلی</a></li><li><a href="#">تماس با ما</a></li></ul>
+      </div>
+      <div class="foot-col">
+        <h5>پشتیبانی</h5>
+        <ul><li><a href="#">مرکز راهنما</a></li><li><a href="#">قوانین</a></li><li><a href="#">حریم خصوصی</a></li></ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© ۲۰۲۶ VORTEXA. تمامی حقوق محفوظ است.</span>
+      <span>Made with 💜 for gamers</span>
+    </div>
+  </div>
+</footer>
+
+<div class="to-top" id="toTop">↑</div>
+
+<script>
+/* ===================== HEADER SCROLL ===================== */
+const header = document.getElementById('siteHeader');
+const toTop = document.getElementById('toTop');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 40);
+  toTop.classList.toggle('show', window.scrollY > 600);
+});
+toTop.addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+/* ===================== MOBILE MENU ===================== */
+const burger = document.getElementById('burger');
+const navLinks = document.getElementById('navLinks');
+burger.addEventListener('click', () => {
+  navLinks.classList.toggle('open');
+  burger.classList.toggle('active');
+});
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+/* ===================== CURSOR GLOW ===================== */
+const glow = document.getElementById('cursorGlow');
+let gx=0, gy=0, cx=0, cy=0;
+window.addEventListener('mousemove', e => { gx = e.clientX; gy = e.clientY; });
+function animateGlow(){
+  cx += (gx-cx)*0.12; cy += (gy-cy)*0.12;
+  glow.style.transform = `translate(${cx-190}px, ${cy-190}px)`;
+  requestAnimationFrame(animateGlow);
+}
+animateGlow();
+
+/* ===================== SCROLL REVEAL ===================== */
+const revealEls = document.querySelectorAll('.reveal, .reveal-scale');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.classList.add('in');
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+revealEls.forEach((el, i) => {
+  el.style.transitionDelay = (i % 6) * 0.07 + 's';
+  io.observe(el);
+});
+
+/* ===================== COUNTER ANIMATION ===================== */
+function toPersianDigits(str){
+  const fa = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  return String(str).replace(/[0-9]/g, d => fa[d]);
+}
+function formatCompact(n){
+  if(n >= 1000000) return (n/1000000).toFixed(1).replace('.0','') + 'M+';
+  if(n >= 1000) return (n/1000).toFixed(0) + 'K+';
+  return n.toString();
+}
+const counters = document.querySelectorAll('.counter');
+const counterIO = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const el = entry.target;
+      const target = parseInt(el.dataset.target, 10);
+      const duration = 1800;
+      const startTime = performance.now();
+      function tick(now){
+        const progress = Math.min((now - startTime) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.floor(eased * target);
+        el.textContent = toPersianDigits(target > 9999 ? formatCompact(current) : current);
+        if(progress < 1) requestAnimationFrame(tick);
+        else el.textContent = toPersianDigits(target > 9999 ? formatCompact(target) : target);
+      }
+      requestAnimationFrame(tick);
+      counterIO.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+counters.forEach(c => counterIO.observe(c));
+
+/* ===================== GLITCH TITLE HOVER ===================== */
+const glitchTitle = document.getElementById('glitchTitle');
+glitchTitle.addEventListener('mouseenter', () => {
+  const layers = glitchTitle.querySelectorAll('.layer');
+  layers[0].style.transition = 'none';
+  layers[1].style.transition = 'none';
+  layers[0].style.backgroundImage = 'linear-gradient(90deg,#ff3d81,#ff3d81)';
+  layers[1].style.backgroundImage = 'linear-gradient(90deg,#00e5c7,#00e5c7)';
+  let n = 0;
+  const glitchInterval = setInterval(() => {
+    n++;
+    layers[0].style.opacity = Math.random() > 0.5 ? '0.7' : '0';
+    layers[0].style.transform = `translate(${(Math.random()-0.5)*6}px,0)`;
+    layers[1].style.opacity = Math.random() > 0.5 ? '0.7' : '0';
+    layers[1].style.transform = `translate(${(Math.random()-0.5)*-6}px,0)`;
+    if(n > 8){
+      clearInterval(glitchInterval);
+      layers[0].style.opacity = '0'; layers[1].style.opacity = '0';
+    }
+  }, 60);
+});
+
+/* ===================== TESTIMONIAL SLIDER ===================== */
+const testiTrack = document.getElementById('testiTrack');
+const testiCards = testiTrack.children.length;
+let testiIndex = 0;
+function getVisible(){ return window.innerWidth <= 640 ? 1 : 3; }
+function updateTesti(){
+  const visible = getVisible();
+  const max = Math.max(0, testiCards - visible);
+  testiIndex = Math.min(testiIndex, max);
+  const cardWidth = testiTrack.children[0].getBoundingClientRect().width + 22;
+  testiTrack.style.transform = `translateX(${testiIndex * cardWidth}px)`;
+}
+document.getElementById('testiNext').addEventListener('click', () => {
+  const visible = getVisible();
+  const max = Math.max(0, testiCards - visible);
+  testiIndex = testiIndex < max ? testiIndex + 1 : 0;
+  updateTesti();
+});
+document.getElementById('testiPrev').addEventListener('click', () => {
+  const visible = getVisible();
+  const max = Math.max(0, testiCards - visible);
+  testiIndex = testiIndex > 0 ? testiIndex - 1 : max;
+  updateTesti();
+});
+window.addEventListener('resize', updateTesti);
+
+/* ===================== NEWSLETTER FORM ===================== */
+document.getElementById('newsForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const note = document.getElementById('formNote');
+  note.textContent = 'ثبت شد! به‌زودی خبرهای ورتکسا رو دریافت می‌کنی 🎉';
+  note.style.color = '#00e5c7';
+  this.reset();
+});
+
+/* ===================== PARTICLE BACKGROUND CANVAS ===================== */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = document.body.scrollHeight > window.innerHeight * 3 ? window.innerHeight * 2 : document.body.scrollHeight;
+}
+function initParticles(){
+  particles = [];
+  const count = window.innerWidth < 700 ? 35 : 70;
+  for(let i=0;i<count;i++){
+    particles.push({
+      x: Math.random()*canvas.width,
+      y: Math.random()*canvas.height,
+      r: Math.random()*1.8 + 0.4,
+      vy: Math.random()*0.3 + 0.08,
+      vx: (Math.random()-0.5)*0.15,
+      alpha: Math.random()*0.5 + 0.15,
+      hue: Math.random() > 0.5 ? '139,92,246' : '0,229,199'
+    });
+  }
+}
+function drawParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p => {
+    p.y -= p.vy; p.x += p.vx;
+    if(p.y < -10) p.y = canvas.height + 10;
+    if(p.x < -10) p.x = canvas.width + 10;
+    if(p.x > canvas.width + 10) p.x = -10;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(${p.hue},${p.alpha})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawParticles);
+}
+resizeCanvas();
+initParticles();
+drawParticles();
+window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+
+/* Respect reduced motion preference for particle canvas */
+if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  canvas.style.display = 'none';
+}
+</script>
+</body>
+</html>
